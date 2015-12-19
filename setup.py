@@ -20,6 +20,6 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts':
-            ['inipgdump = src.core:main']
+            ['inipgdump = inipgdump.core:main']
         }
 )
