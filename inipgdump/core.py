@@ -92,7 +92,7 @@ def main():
     if not os.path.isdir(dump_dir):
         print('Folder \'%s\' not found' % dump_dir)
         sys.exit(1)
-    if keep_count <= 0:
+    if keep_count < 0:
         print('keep_count must be greater than 0')
         sys.exit(1)
     make_dump(conf_file, dump_dir, keep_count)
