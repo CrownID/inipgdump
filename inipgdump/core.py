@@ -60,7 +60,8 @@ def make_dump(conf_file, dump_dir, keep_count):
     if not port:
         port = '5432'
     dump_name = dump_dir + '/'+ host + '_' + name + '_' + datetime.datetime.now().strftime("%F_%H-%M") + '.dump'
-    get_dump = subprocess.call("pg_dump -h %s -U %s -Fc -v --blobs %s --file %s" % (host, user, name, dump_name),
+    get_dump = subprocess.call("pg_dump -h %s -p %s -U %s -Fc -v --blobs %s --file %s" %
+                               (host, port, user, name, dump_name),
                                 env={"PGPASSWORD": password},
                                 shell=True)
     if get_dump == 0:
