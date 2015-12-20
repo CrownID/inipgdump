@@ -48,26 +48,8 @@ def rotate(dump_dir, host, name, keep_count=30):
             os.remove(d[0])
             print('File %s deleted by rotation' % d[0])
 
-def main():
-    if len(sys.argv) != 4:
-        print('Usage: inipgdump config_file.ini /dump/dir keep_count')
-        sys.exit(1)
-    conf_file = sys.argv[1]
-    if sys.argv[2][-1] == '/':
-        dump_dir = sys.argv[2][:-1]
-    else:
-        dump_dir = sys.argv[2]
 
-    if not os.path.isfile(conf_file):
-        print('File \'%s\' not found' % conf_file)
-        sys.exit(1)
-
-    if not os.path.isdir(dump_dir):
-        print('Folder \'%s\' not found' % dump_dir)
-        sys.exit(1)
-
-    keep_count = int(sys.argv[3])
-
+def make_dump(conf_file, dump_dir, keep_count):
     config = ConfigParser.ConfigParser()
     config.readfp(open(conf_file))
     host = config.get('database', 'database_host')
@@ -77,15 +59,43 @@ def main():
     port = config.get('database', 'database_port')
     if not port:
         port = '5432'
-    dump_name = dump_dir + '/'+ host + '_' + name + '_' + datetime.date.strftime(datetime.date.today(), "%F") + '.dump'
+    dump_name = dump_dir + '/'+ host + '_' + name + '_' + datetime.datetime.now().strftime("%F_%H-%M") + '.dump'
     get_dump = subprocess.call("pg_dump -h %s -U %s -Fc -v --blobs %s --file %s" % (host, user, name, dump_name),
                                 env={"PGPASSWORD": password},
                                 shell=True)
     if get_dump == 0:
-        rotate(dump_dir, host, name, keep_count)
+        if keep_count > 0:
+            rotate(dump_dir, host, name, keep_count)
     else:
         print('Dump creation error!')
         sys.exit(1)
+
+
+def main():
+    if len(sys.argv) == 3:
+        keep_count = 0
+    elif len(sys.argv) == 4:
+        keep_count = int(sys.argv[3])
+    else:
+        print('Usage (without rotation): inipgdump config_file.ini /dump/dir')
+        print('Usage (with rotation): inipgdump config_file.ini /dump/dir keep_count')
+        sys.exit(1)
+    conf_file = sys.argv[1]
+    if sys.argv[2][-1] == '/':
+        dump_dir = sys.argv[2][:-1]
+    else:
+        dump_dir = sys.argv[2]
+    if not os.path.isfile(conf_file):
+        print('File \'%s\' not found' % conf_file)
+        sys.exit(1)
+    if not os.path.isdir(dump_dir):
+        print('Folder \'%s\' not found' % dump_dir)
+        sys.exit(1)
+    if keep_count <= 0:
+        print('keep_count must be greater than 0')
+        sys.exit(1)
+    make_dump(conf_file, dump_dir, keep_count)
+
 
 if __name__ == "__main__":
     main()

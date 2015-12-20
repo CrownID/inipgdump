@@ -7,7 +7,7 @@ Installation:
 
 Creates a dump of the PostgreSQL database. The naming format of dump:
 
-    $host_$dname_$date.dump
+    $host_$dbname_$datetime.dump
 
 Stores the specified number of dumps, deletes the old dumps.
 
@@ -22,7 +22,8 @@ Options to create a dump taken from the configuration file in the following form
 
 Usage: 
 
-    inipgdump /path/to/config_file.ini /dump/dir keep_count
+    (without rotation): inipgdump config_file.ini /dump/dir
+    (with rotation): inipgdump config_file.ini /dump/dir keep_count
               
 Examples of usage in the cron::
 
