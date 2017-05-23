@@ -49,7 +49,7 @@ def rotate(dump_dir, host, name, keep_count=30):
             print('File %s deleted by rotation' % d[0])
 
 
-def make_dump(conf_file, dump_dir, keep_count):
+def make_dump(conf_file, dump_dir, keep_count, with_data):
     config = ConfigParser.ConfigParser()
     config.readfp(open(conf_file))
     host = config.get('database', 'database_host')
@@ -57,11 +57,15 @@ def make_dump(conf_file, dump_dir, keep_count):
     user = config.get('database', 'database_user')
     password = config.get('database', 'database_password')
     port = config.get('database', 'database_port')
+    if (with_data==False):
+        dataskip=" -s"
+    else:
+        dataskip=""
     if not port:
         port = '5432'
     dump_name = dump_dir + '/'+ host + '_' + name + '_' + datetime.datetime.now().strftime("%F_%H-%M") + '.dump'
-    get_dump = subprocess.call("pg_dump -h %s -p %s -U %s -Fc -v --blobs %s --file %s" %
-                               (host, port, user, name, dump_name),
+    get_dump = subprocess.call("pg_dump -h %s -p %s -U %s -Fc -v --blobs %s --file %s %s" %
+                               (host, port, user, name, dump_name, dataskip),
                                 env={"PGPASSWORD": password},
                                 shell=True)
     if get_dump == 0:
@@ -95,7 +99,7 @@ def main():
     if keep_count < 0:
         print('keep_count must be greater than 0')
         sys.exit(1)
-    make_dump(conf_file, dump_dir, keep_count)
+    make_dump(conf_file, dump_dir, keep_count, True)
 
 
 if __name__ == "__main__":
